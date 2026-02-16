@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>本棚一覧</title>
+    <style>
+        body { font-family: sans-serif; background-color: #f4f4f4; padding: 20px; }
+        .book-container { display: flex; flex-wrap: wrap; gap: 20px; }
+        .book-card { background: white; padding: 15px; border-radius: 8px; width: 200px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .book-card img { max-width: 100%; height: auto; }
+        h1 { color: #333; }
+    </style>
+</head>
+<body>
+    <h1>📚 本棚一覧</h1>
+    <div class="book-container">
+        {% for book in books %}
+        <div class="book-card">
+            <img src="{{ book.thumbnail }}" alt="表紙">
+            <h3>{{ book.title }}</h3>
+            <p>著者: {{ book.authors }}</p>
+            <p>場所: {{ book.location }}</p>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>

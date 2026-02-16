@@ -3,6 +3,8 @@ import requests
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 from dotenv import load_dotenv
+from fastapi.templating import Jinja2Templates
+from fastapi import Request 
 
 # 自分で作ったファイルから設定を読み込む
 from database import engine, get_db
@@ -15,10 +17,18 @@ load_dotenv()
 API_KEY = os.getenv("GOOGLE_BOOKS_API_KEY")
 
 app = FastAPI()
+templates = Jinja2Templates(directory="templates")
 
 @app.get("/")
 def read_root():
     return {"message": "データベース連携完了！本を登録できます。"}
+
+# データベースから本の一覧を取得して表示するルート
+@app.get("/books")
+def read_books(request: Request, db: Session = Depends(get_db)):
+    books = db.query(models.Book).all() # データベースのすべての本を取得
+    # HTML画面を表示する！
+    return templates.TemplateResponse("books.html", {"request": request, "books": books})
 
 # 本を検索して、自動でデータベースに保存する魔法のルート
 @app.get("/register/{isbn}")
