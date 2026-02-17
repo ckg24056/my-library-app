@@ -13,6 +13,10 @@
 </head>
 <body>
     <h1>📚 本棚一覧</h1>
+    <div style="margin-bottom: 20px; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+        <input type="text" id="isbnInput" placeholder="ISBNを入力 (例: 9784274226373)" style="padding: 10px; width: 300px; border: 1px solid #ddd; border-radius: 4px;">
+        <button onclick="registerBook()" style="padding: 10px 20px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">登録</button>
+    </div>
     <div class="book-container">
         {% for book in books %}
         <div class="book-card">
@@ -23,5 +27,30 @@
         </div>
         {% endfor %}
     </div>
+    <script>
+        async function registerBook() {
+            const isbn = document.getElementById('isbnInput').value;
+            if (!isbn) {
+                alert("ISBNを入力してください");
+                return;
+            }
+
+            try {
+                // 登録用APIを呼び出す
+                const response = await fetch(`/register/${isbn}`);
+                const data = await response.json();
+                
+                alert(data.message);
+                
+                // 登録成功したら画面をリロードして一覧を更新
+                if (response.ok) {
+                    location.reload();
+                }
+            } catch (error) {
+                console.error('エラー:', error);
+                alert("登録に失敗しました");
+            }
+        }
+    </script>
 </body>
 </html>
