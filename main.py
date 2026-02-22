@@ -69,3 +69,13 @@ def register_book(isbn: str, db: Session = Depends(get_db)):
     except Exception as e:
         db.rollback() # エラーが起きたら元に戻す
         return {"error": "既に登録されているか、エラーが発生しました", "detail": str(e)}
+
+# 削除用API
+@app.delete("/delete/{book_id}")
+def delete_book(book_id: int, db: Session = Depends(get_db)):
+    book = db.query(models.Book).filter(models.Book.id == book_id).first()
+    if book:
+        db.delete(book)
+        db.commit()
+        return {"message": "削除しました"}
+    return {"message": "本が見つかりませんでした"}, 404

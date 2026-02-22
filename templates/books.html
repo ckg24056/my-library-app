@@ -19,38 +19,64 @@
     </div>
     <div class="book-container">
         {% for book in books %}
-        <div class="book-card">
-            <img src="{{ book.thumbnail }}" alt="表紙">
-            <h3>{{ book.title }}</h3>
-            <p>著者: {{ book.authors }}</p>
-            <p>場所: {{ book.location }}</p>
-        </div>
+        <div class="book-container">
+    {% for book in books %}
+    <div class="book-card">
+        <img src="{{ book.thumbnail }}" alt="表紙">
+        <h3>{{ book.title }}</h3>
+        <p>著者: {{ book.authors }}</p>
+        <p>場所: {{ book.location }}</p>
+        
+        <button onclick="deleteBook({{ book.id }})" 
+                style="width: 100%; margin-top: 10px; background-color: #dc3545; color: white; border: none; border-radius: 4px; padding: 8px; cursor: pointer;">
+            削除
+        </button>
+    </div>
+    {% endfor %}
+</div>
         {% endfor %}
     </div>
     <script>
-        async function registerBook() {
-            const isbn = document.getElementById('isbnInput').value;
-            if (!isbn) {
-                alert("ISBNを入力してください");
-                return;
-            }
-
-            try {
-                // 登録用APIを呼び出す
-                const response = await fetch(`/register/${isbn}`);
-                const data = await response.json();
-                
-                alert(data.message);
-                
-                // 登録成功したら画面をリロードして一覧を更新
-                if (response.ok) {
-                    location.reload();
-                }
-            } catch (error) {
-                console.error('エラー:', error);
-                alert("登録に失敗しました");
-            }
+    // 本を登録する機能
+    async function registerBook() {
+        const isbn = document.getElementById('isbnInput').value;
+        if (!isbn) {
+            alert("ISBNを入力してください");
+            return;
         }
-    </script>
+
+        try {
+            const response = await fetch(`/register/${isbn}`);
+            const data = await response.json();
+            alert(data.message);
+            if (response.ok) {
+                location.reload();
+            }
+        } catch (error) {
+            console.error('登録エラー:', error);
+            alert("登録に失敗しました");
+        }
+    }
+
+    // 本を削除する機能（←ここが重要！）
+    async function deleteBook(bookId) {
+        if (!confirm("本当にこの本を削除しますか？")) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`/delete/${bookId}`, { 
+                method: 'DELETE' 
+            });
+            const data = await response.json();
+            
+            alert(data.message);
+            location.reload(); 
+        } catch (error) {
+            console.error('削除エラー:', error);
+            alert("削除に失敗しました");
+        }
+    }
+</script>
 </body>
 </html>
