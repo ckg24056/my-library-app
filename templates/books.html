@@ -25,12 +25,15 @@
         <img src="{{ book.thumbnail }}" alt="表紙">
         <h3>{{ book.title }}</h3>
         <p>著者: {{ book.authors }}</p>
-        <p>場所: {{ book.location }}</p>
-        
-        <button onclick="deleteBook({{ book.id }})" 
-                style="width: 100%; margin-top: 10px; background-color: #dc3545; color: white; border: none; border-radius: 4px; padding: 8px; cursor: pointer;">
-            削除
+        <p>場所: <input type="text" id="loc-{{ book.id }}" value="{{ book.location }}" style="width: 80px;"></p>
+        <p>読んだ回数: <input type="number" id="count-{{ book.id }}" value="{{ book.read_count }}" style="width: 40px;"> 回</p>
+
+        <button onclick="updateBook({{ book.id }})" 
+                style="width: 100%; margin-top: 5px; background-color: #007bff; color: white; border: none; border-radius: 4px; padding: 8px; cursor: pointer;">
+            保存
         </button>
+
+        <button onclick="deleteBook({{ book.id }})" ...>削除</button>
     </div>
     {% endfor %}
 </div>
@@ -77,6 +80,35 @@
             alert("削除に失敗しました");
         }
     }
+
+
+    async function updateBook(bookId) {
+    // 変数名を 'bookLocation' に変更（locationという名前を避ける）
+    const bookLocation = document.getElementById(`loc-${bookId}`).value;
+    const readCount = document.getElementById(`count-${bookId}`).value;
+
+    try {
+        // URLのパラメータ部分も bookLocation を使うように修正
+        const response = await fetch(`/update/${bookId}?location=${encodeURIComponent(bookLocation)}&read_count=${readCount}`, { 
+            method: 'PUT' 
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            alert("更新しました！");
+            // これで本来のリロード機能が正しく動きます
+            window.location.reload(); 
+        } else {
+            alert("サーバーエラー: " + (data.detail || data.message));
+        }
+    } catch (error) {
+        console.error('更新エラー:', error);
+        alert("通信に失敗しました");
+    }
+}
+
+
 </script>
 </body>
 </html>

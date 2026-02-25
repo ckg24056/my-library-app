@@ -79,3 +79,20 @@ def delete_book(book_id: int, db: Session = Depends(get_db)):
         db.commit()
         return {"message": "削除しました"}
     return {"message": "本が見つかりませんでした"}, 404
+
+
+# 更新用API（場所や読書回数を変更する）
+@app.put("/update/{book_id}")
+def update_book(book_id: int, location: str = None, read_count: int = None, db: Session = Depends(get_db)):
+    book = db.query(models.Book).filter(models.Book.id == book_id).first()
+    if not book:
+        return {"message": "本が見つかりませんでした"}, 404
+    
+    # 送られてきたデータがあれば更新する
+    if location is not None:
+        book.location = location
+    if read_count is not None:
+        book.read_count = read_count
+        
+    db.commit()
+    return {"message": "更新しました", "location": book.location, "read_count": book.read_count}
