@@ -31,8 +31,16 @@ def read_books(request: Request, db: Session = Depends(get_db)):
     return templates.TemplateResponse("books.html", {"request": request, "books": books})
 
 # 本を検索して、自動でデータベースに保存する魔法のルート
+# main.py の登録処理を修正
 @app.get("/register/{isbn}")
 def register_book(isbn: str, db: Session = Depends(get_db)):
+    # 1. すでにそのISBNの本が登録されていないかチェック
+    existing_book = db.query(models.Book).filter(models.Book.isbn == isbn).first()
+    if existing_book:
+        return {"message": "その本はすでに本棚にあります"}
+
+    # 2. なければAPIで検索して登録（今までの処理）
+    # ...（以下、既存の検索・保存コード）
     # 1. Google Books APIに問い合わせ
     url = f"https://www.googleapis.com/books/v1/volumes?q=isbn:{isbn}&key={API_KEY}"
     response = requests.get(url)

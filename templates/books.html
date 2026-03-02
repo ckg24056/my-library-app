@@ -4,111 +4,120 @@
     <meta charset="UTF-8">
     <title>本棚一覧</title>
     <style>
-        body { font-family: sans-serif; background-color: #f4f4f4; padding: 20px; }
-        .book-container { display: flex; flex-wrap: wrap; gap: 20px; }
-        .book-card { background: white; padding: 15px; border-radius: 8px; width: 200px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .book-card img { max-width: 100%; height: auto; }
-        h1 { color: #333; }
+        /* 全体の設定 */
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #f8f9fa; margin: 0; padding: 20px; color: #333; }
+        .header { display: flex; align-items: center; margin-bottom: 30px; }
+        .header h1 { margin: 0; font-size: 28px; }
+
+        /* 登録エリア */
+        .register-area { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 40px; display: flex; gap: 10px; }
+        .register-area input { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
+        .btn-reg { background-color: #28a745; color: white; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .btn-reg:hover { background-color: #218838; }
+
+        /* 本棚（カード）のコンテナ */
+        .book-container { display: flex; flex-wrap: wrap; gap: 25px; justify-content: flex-start; }
+
+        /* 個別のカードデザイン */
+        .book-card { background: white; border-radius: 12px; padding: 20px; width: 220px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); text-align: center; transition: transform 0.2s; }
+        .book-card:hover { transform: translateY(-5px); }
+        .book-card img { width: 100%; height: 220px; object-fit: contain; border-radius: 4px; margin-bottom: 15px; }
+        .book-card h3 { font-size: 1.1em; margin: 10px 0; height: 2.4em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+        
+        .info-row { text-align: left; margin: 12px 0; font-size: 0.9em; line-height: 1.6; }
+        .info-row input { padding: 4px 8px; border: 1px solid #ccc; border-radius: 4px; }
+
+        /* ボタンのデザイン（サイズを揃えて色を調整） */
+        .button-group { 
+            display: flex; 
+            gap: 10px;           /* ボタン同士の隙間 */
+            margin-top: 20px; 
+        }
+
+        .btn-save { 
+            flex: 1;             /* 保存と削除を同じ大きさに (1:1) */
+            background-color: #007bff; 
+            color: white; 
+            border: none; 
+            padding: 10px; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-weight: bold; 
+        }
+        
+        .btn-delete { 
+            flex: 1;             /* 保存と削除を同じ大きさに (1:1) */
+            background-color: #dc3545; /* 赤背景 */
+            color: white;              /* 白文字 */
+            border: none; 
+            padding: 10px; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-weight: bold; 
+        }
+        
+        /* マウスを乗せた時の色の変化 */
+        .btn-save:hover { background-color: #0056b3; }
+        .btn-delete:hover { background-color: #a71d2a; }
     </style>
 </head>
 <body>
-    <h1>📚 本棚一覧</h1>
-    <div style="margin-bottom: 20px; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-        <input type="text" id="isbnInput" placeholder="ISBNを入力 (例: 9784274226373)" style="padding: 10px; width: 300px; border: 1px solid #ddd; border-radius: 4px;">
-        <button onclick="registerBook()" style="padding: 10px 20px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">登録</button>
+
+    <div class="header">
+        <h1>📚 本棚一覧</h1>
     </div>
+
+    <div class="register-area">
+        <input type="text" id="isbnInput" placeholder="ISBNを入力 (例: 9784274226373)">
+        <button class="btn-reg" onclick="registerBook()">登録</button>
+    </div>
+
     <div class="book-container">
         {% for book in books %}
-        <div class="book-container">
-    {% for book in books %}
-    <div class="book-card">
-        <img src="{{ book.thumbnail }}" alt="表紙">
-        <h3>{{ book.title }}</h3>
-        <p>著者: {{ book.authors }}</p>
-        <p>場所: <input type="text" id="loc-{{ book.id }}" value="{{ book.location }}" style="width: 80px;"></p>
-        <p>読んだ回数: <input type="number" id="count-{{ book.id }}" value="{{ book.read_count }}" style="width: 40px;"> 回</p>
+        <div class="book-card">
+            <img src="{{ book.thumbnail }}" alt="表紙">
+            <h3>{{ book.title }}</h3>
+            
+            <div class="info-row">
+                場所: <input type="text" id="loc-{{ book.id }}" value="{{ book.location }}" style="width: 100px;">
+            </div>
+            <div class="info-row">
+                読数: <input type="number" id="count-{{ book.id }}" value="{{ book.read_count }}" style="width: 45px;"> 回
+            </div>
 
-        <button onclick="updateBook({{ book.id }})" 
-                style="width: 100%; margin-top: 5px; background-color: #007bff; color: white; border: none; border-radius: 4px; padding: 8px; cursor: pointer;">
-            保存
-        </button>
-
-        <button onclick="deleteBook({{ book.id }})" ...>削除</button>
-    </div>
-    {% endfor %}
-</div>
+            <div class="button-group">
+                <button class="btn-save" onclick="updateBook({{ book.id }})">保存</button>
+                <button class="btn-delete" onclick="deleteBook({{ book.id }})">削除</button>
+            </div>
+        </div>
         {% endfor %}
     </div>
+
     <script>
-    // 本を登録する機能
-    async function registerBook() {
-        const isbn = document.getElementById('isbnInput').value;
-        if (!isbn) {
-            alert("ISBNを入力してください");
-            return;
-        }
+        async function registerBook() {
+            const isbnInput = document.getElementById('isbnInput');
+            const isbn = isbnInput.value;
+            if (!isbn) { alert("ISBNを入力してください"); return; }
 
-        try {
-            const response = await fetch(`/register/${isbn}`);
-            const data = await response.json();
-            alert(data.message);
-            if (response.ok) {
-                location.reload();
+            try {
+                const response = await fetch('/register/' + isbn);
+                const data = await response.json();
+                alert(data.message || data.detail);
+                if (response.ok) { location.reload(); }
+            } catch (error) {
+                alert("登録中にエラーが発生しました");
             }
-        } catch (error) {
-            console.error('登録エラー:', error);
-            alert("登録に失敗しました");
-        }
-    }
-
-    // 本を削除する機能（←ここが重要！）
-    async function deleteBook(bookId) {
-        if (!confirm("本当にこの本を削除しますか？")) {
-            return;
         }
 
-        try {
-            const response = await fetch(`/delete/${bookId}`, { 
-                method: 'DELETE' 
-            });
-            const data = await response.json();
-            
-            alert(data.message);
-            location.reload(); 
-        } catch (error) {
-            console.error('削除エラー:', error);
-            alert("削除に失敗しました");
+        async function updateBook(bookId) {
+            const loc = document.getElementById(`loc-${bookId}`).value;
+            const count = document.getElementById(`count-${bookId}`).value;
+            try {
+                const url = `/update/${bookId}?location=${encodeURIComponent(loc)}&read_count=${count}`;
+                const response = await fetch(url, { method: 'PUT' });
+                if (response.ok) { alert("更新しました！"); location.reload(); }
+            } catch (error) { alert("更新に失敗しました"); }
         }
-    }
 
-
-    async function updateBook(bookId) {
-    // 変数名を 'bookLocation' に変更（locationという名前を避ける）
-    const bookLocation = document.getElementById(`loc-${bookId}`).value;
-    const readCount = document.getElementById(`count-${bookId}`).value;
-
-    try {
-        // URLのパラメータ部分も bookLocation を使うように修正
-        const response = await fetch(`/update/${bookId}?location=${encodeURIComponent(bookLocation)}&read_count=${readCount}`, { 
-            method: 'PUT' 
-        });
-        
-        const data = await response.json();
-        
-        if (response.ok) {
-            alert("更新しました！");
-            // これで本来のリロード機能が正しく動きます
-            window.location.reload(); 
-        } else {
-            alert("サーバーエラー: " + (data.detail || data.message));
-        }
-    } catch (error) {
-        console.error('更新エラー:', error);
-        alert("通信に失敗しました");
-    }
-}
-
-
-</script>
-</body>
-</html>
+        async function deleteBook(bookId) {
+            if (!
