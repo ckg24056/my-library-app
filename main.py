@@ -23,12 +23,21 @@ templates = Jinja2Templates(directory="templates")
 def read_root():
     return {"message": "データベース連携完了！本を登録できます。"}
 
-# データベースから本の一覧を取得して表示するルート
+
+# main.py の既存の read_books を修正
 @app.get("/books")
-def read_books(request: Request, db: Session = Depends(get_db)):
-    books = db.query(models.Book).all() # データベースのすべての本を取得
-    # HTML画面を表示する！
-    return templates.TemplateResponse("books.html", {"request": request, "books": books})
+def read_books(request: Request, q: str = None, db: Session = Depends(get_db)):
+    # 検索キーワード(q)がある場合はフィルタリング、ない場合は全件取得
+    query = db.query(models.Book)
+    if q:
+        # タイトル または 著者名 にキーワードが含まれているものを探す
+        query = query.filter(
+            (models.Book.title.contains(q)) | (models.Book.authors.contains(q))
+        )
+    
+    books = query.all()
+    return templates.TemplateResponse("books.html", {"request": request, "books": books, "search_query": q})
+
 
 # 本を検索して、自動でデータベースに保存する魔法のルート
 # main.py の登録処理を修正
