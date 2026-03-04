@@ -2,62 +2,110 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>本棚一覧</title>
+    <title>蔵書管理システム - 一覧</title>
     <style>
-        body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #f8f9fa; margin: 0; padding: 20px; color: #333; }
-        .header { display: flex; align-items: center; margin-bottom: 30px; }
-        .register-area { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 40px; display: flex; gap: 10px; }
-        .register-area input { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
-        .btn-reg { background-color: #28a745; color: white; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        /* 設計資料に基づいた落ち着いたデザイン */
+        body { font-family: 'MS PGothic', sans-serif; margin: 20px; background-color: #fff; color: #333; line-height: 1.6; }
+        h1 { border-bottom: 3px solid #333; padding-bottom: 5px; margin-bottom: 25px; }
         
-        .book-container { display: flex; flex-wrap: wrap; gap: 25px; }
-        .book-card { background: white; border-radius: 12px; padding: 20px; width: 220px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); text-align: center; }
-        .book-card img { width: 100%; height: 220px; object-fit: contain; border-radius: 4px; margin-bottom: 15px; }
-        .book-card h3 { font-size: 1.1em; margin: 10px 0; height: 2.4em; overflow: hidden; }
+        /* セクション（枠）の設定 */
+        .section-box { border: 1px solid #999; padding: 15px; margin-bottom: 25px; border-radius: 4px; background-color: #fafafa; }
+        .section-title { font-weight: bold; margin-bottom: 15px; display: block; border-left: 6px solid #0056b3; padding-left: 10px; font-size: 1.1em; }
         
-        .info-row { text-align: left; margin: 12px 0; font-size: 0.9em; }
-        .info-row input { padding: 4px 8px; border: 1px solid #ccc; border-radius: 4px; }
+        /* フォーム要素 */
+        .form-inline { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        input[type="text"], select { padding: 8px; border: 1px solid #ccc; border-radius: 3px; }
+        .btn { padding: 8px 16px; cursor: pointer; border: 1px solid #666; border-radius: 3px; font-weight: bold; transition: 0.2s; }
+        .btn-blue { background-color: #e7f1ff; color: #0056b3; border-color: #0056b3; }
+        .btn-blue:hover { background-color: #0056b3; color: white; }
+        .btn-green { background-color: #28a745; color: white; border: none; }
+        .btn-red { background-color: #dc3545; color: white; border: none; }
 
-        /* ボタンのデザイン（1:1のサイズ、保存＝青、削除＝赤） */
-        .button-group { display: flex; gap: 10px; margin-top: 20px; }
-        .btn-save { flex: 1; background-color: #007bff; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        .btn-delete { flex: 1; background-color: #dc3545; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        /* 蔵書一覧テーブル（設計図：表形式） */
+        .table-wrapper { overflow-x: auto; background: white; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; min-width: 600px; }
+        th, td { border: 1px solid #ccc; padding: 12px; text-align: left; vertical-align: middle; }
+        th { background-color: #f2f2f2; font-size: 0.9em; }
         
-        .btn-save:hover { background-color: #0056b3; }
-        .btn-delete:hover { background-color: #a71d2a; }
+        .img-thumb { width: 60px; height: 85px; object-fit: contain; border: 1px solid #eee; background: #fff; }
+        .count-area { display: flex; align-items: center; gap: 10px; }
+        .count-num { font-size: 1.2em; font-weight: bold; color: #0056b3; }
+        .btn-plus { background: #6c757d; color: white; border: none; padding: 2px 8px; border-radius: 4px; cursor: pointer; font-size: 0.8em; }
+
+        .book-info b { font-size: 1.05em; display: block; margin-bottom: 4px; }
+        .book-info small { color: #666; }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h1>📚 本棚一覧</h1>
-    </div>
+    <h1>[ わたしの個人図書館 ]</h1>
 
-    <div class="register-area">
-        <input type="text" id="isbnInput" placeholder="ISBNを入力">
-        <button class="btn-reg" onclick="registerBook()">登録</button>
-    </div>
-
-    <div class="book-container">
-        {% for book in books %}
-        <div class="book-card">
-            <img src="{{ book.thumbnail }}">
-            <h3>{{ book.title }}</h3>
-            <div class="info-row">
-                場所: <input type="text" id="loc-{{ book.id }}" value="{{ book.location }}" style="width: 100px;">
-            </div>
-            <div class="info-row">
-                読数: <input type="number" id="count-{{ book.id }}" value="{{ book.read_count }}" style="width: 45px;"> 回
-            </div>
-            <div class="button-group">
-                <button class="btn-save" onclick="updateBook({{ book.id }})">保存</button>
-                <button class="btn-delete" onclick="deleteBook({{ book.id }})">削除</button>
-            </div>
+    <div class="section-box">
+        <span class="section-title">▼ ISBNでクイック登録</span>
+        <div class="form-inline">
+            <input type="text" id="isbnInput" placeholder="ISBN番号（13桁）を入力" style="width: 250px;">
+            <button class="btn btn-blue" onclick="registerBook()">Googleで検索して登録</button>
         </div>
-        {% endfor %}
+    </div>
+
+    <div class="section-box">
+        <span class="section-title">▼ 蔵書をさがす</span>
+        <div class="form-inline">
+            <input type="text" placeholder="キーワード（書名・著者）を入力" style="width: 200px;">
+            <select>
+                <option value="">ジャンル: 全て</option>
+                <option value="技術書">技術書</option>
+                <option value="小説">小説</option>
+            </select>
+            <button class="btn btn-blue">検索実行</button>
+        </div>
+    </div>
+
+    <div class="section-box">
+        <span class="section-title">【 登録済み書籍一覧 】</span>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 70px;">表紙</th>
+                        <th>タイトル / 著者</th>
+                        <th style="width: 150px;">保管場所</th>
+                        <th style="width: 100px;">読了</th>
+                        <th style="width: 130px;">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for book in books %}
+                    <tr>
+                        <td><img src="{{ book.thumbnail }}" class="img-thumb" alt="no image"></td>
+                        <td class="book-info">
+                            <b>{{ book.title }}</b>
+                            <small>著者: {{ book.authors }}</small>
+                        </td>
+                        <td>
+                            <input type="text" id="loc-{{ book.id }}" value="{{ book.location }}" style="width: 90%;">
+                        </td>
+                        <td>
+                            <div class="count-area">
+                                <span class="count-num" id="display-count-{{ book.id }}">{{ book.read_count }}</span>
+                                <button class="btn-plus" onclick="quickIncrement({{ book.id }}, {{ book.read_count }})">＋1</button>
+                            </div>
+                        </td>
+                        <td>
+                            <div style="display: flex; flex-direction: column; gap: 5px;">
+                                <button class="btn btn-green" onclick="updateBook({{ book.id }})" style="padding: 4px; font-size: 0.85em;">更新して保存</button>
+                                <button class="btn btn-red" onclick="deleteBook({{ book.id }})" style="padding: 4px; font-size: 0.85em;">この本を削除</button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <script>
+        // 機能1: ISBN登録
         async function registerBook() {
             const isbn = document.getElementById('isbnInput').value;
             if (!isbn) { alert("ISBNを入力してください"); return; }
@@ -66,20 +114,33 @@
                 const data = await response.json();
                 alert(data.message || data.detail);
                 location.reload();
-            } catch (e) { alert("エラーが発生しました"); }
+            } catch (e) { alert("登録エラーが発生しました"); }
         }
 
+        // 機能3: 読了数カウント（設計資料の[＋1]ボタン）
+        async function quickIncrement(id, currentCount) {
+            const nextCount = currentCount + 1;
+            const loc = document.getElementById('loc-' + id).value;
+            try {
+                const response = await fetch(`/update/${id}?location=${encodeURIComponent(loc)}&read_count=${nextCount}`, { method: 'PUT' });
+                if (response.ok) { location.reload(); }
+            } catch (e) { alert("カウント更新に失敗しました"); }
+        }
+
+        // 更新処理
         async function updateBook(id) {
             const loc = document.getElementById('loc-' + id).value;
-            const count = document.getElementById('count-' + id).value;
+            // 表示されている現在の数値を取得
+            const count = document.getElementById('display-count-' + id).innerText;
             try {
                 const response = await fetch(`/update/${id}?location=${encodeURIComponent(loc)}&read_count=${count}`, { method: 'PUT' });
-                if (response.ok) { alert("更新しました！"); location.reload(); }
+                if (response.ok) { alert("情報を更新しました"); location.reload(); }
             } catch (e) { alert("更新に失敗しました"); }
         }
 
+        // 削除処理
         async function deleteBook(id) {
-            if (!confirm("削除しますか？")) return;
+            if (!confirm("この書籍データを削除してもよろしいですか？")) return;
             try {
                 const response = await fetch('/delete/' + id, { method: 'DELETE' });
                 location.reload();
