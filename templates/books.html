@@ -93,13 +93,42 @@
 
     <script>
         async function registerBook() {
-            const isbn = document.getElementById('isbnInput').value;
-            if (!isbn) { alert("ISBNを入力してください"); return; }
-            const response = await fetch('/register/' + isbn);
-            const data = await response.json();
-            alert(data.message);
+    const isbnInput = document.getElementById('isbnInput');
+    // 全角数字を半角に変換する処理を追加
+    let isbn = isbnInput.value.replace(/[０-９]/g, function(s) {
+        return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
+    }).replace(/[-ー]/g, ''); // ハイフンも消去
+
+    if (!isbn || isbn.length < 10) { 
+        alert("有効なISBNを半角数字で入力してください"); 
+        return; 
+    }
+
+    try {
+        const response = await fetch('/register/' + isbn);
+        
+        // 500エラーなどの場合、JSONではない可能性があるのでテキストで受ける
+        const text = await response.text();
+        let data;
+        try {
+            data = JSON.parse(text);
+        } catch(e) {
+            // JSONでなければサーバーエラーのテキストを表示
+            alert("サーバーでエラーが発生しました。ISBNが正しいか確認してください。");
+            return;
+        }
+
+        const msg = data.message || data.detail || "予期せぬレスポンスです";
+        alert(msg);
+
+        if (response.ok) {
             location.reload();
         }
+    } catch (error) {
+        console.error("Error details:", error);
+        alert("通信エラーが発生しました。");
+    }
+}
 
         function searchBooks() {
             const keyword = document.getElementById('searchInput').value;
